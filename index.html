@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#3B2A3F">
+    <title>Javi &amp; Martín · 6 meses</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💗</text></svg>">
+    <style>
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #120b16; overflow: hidden; }
+      #unity-canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; background: #000; outline: none; }
+      #carga {
+        position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: radial-gradient(ellipse at 50% 35%, #ff9a8b 0%, #e8628c 38%, #6b3a6e 75%, #3b2a3f 100%);
+        color: #fff; font-family: "Segoe Print", "Comic Sans MS", "Bradley Hand", cursive; transition: opacity .9s ease; z-index: 10;
+        text-align: center; padding: 16px; box-sizing: border-box;
+      }
+      #carga.fuera { opacity: 0; pointer-events: none; }
+      #titulo { font-size: clamp(34px, 7vw, 84px); text-shadow: 0 4px 18px rgba(0,0,0,.35); margin: 0 0 4px; }
+      #sub { font-size: clamp(16px, 2.6vw, 28px); opacity: .9; margin-bottom: 28px; }
+      .corazon { position: relative; width: clamp(120px, 22vw, 200px); aspect-ratio: 1; }
+      .corazon svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #relleno { transition: height .35s ease, y .35s ease; }
+      #pct { margin-top: 18px; font-size: clamp(18px, 2.4vw, 26px); font-family: system-ui, "Segoe UI", sans-serif; font-weight: 700; letter-spacing: .05em; }
+      #frase { margin-top: 10px; font-size: clamp(15px, 2vw, 22px); opacity: .85; min-height: 1.6em; transition: opacity .5s; }
+      .late { animation: late 1.1s ease-in-out infinite; transform-origin: 50% 55%; }
+      @keyframes late { 0%,100% { transform: scale(1); } 15% { transform: scale(1.08); } 30% { transform: scale(.98); } 45% { transform: scale(1.05); } }
+      #error { display: none; margin-top: 18px; font-family: system-ui, sans-serif; font-size: 16px; background: rgba(0,0,0,.35); padding: 10px 16px; border-radius: 12px; max-width: 560px; }
+    </style>
+  </head>
+  <body>
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+    <div id="carga">
+      <div id="titulo">Javi &amp; Martín</div>
+      <div id="sub">nuestra historia · 6 meses</div>
+      <div class="corazon late">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <defs>
+            <clipPath id="forma"><path d="M50 88 C20 66 6 50 6 32 C6 18 17 8 30 8 C39 8 46 13 50 20 C54 13 61 8 70 8 C83 8 94 18 94 32 C94 50 80 66 50 88 Z"/></clipPath>
+          </defs>
+          <rect x="0" y="0" width="100" height="100" fill="rgba(255,255,255,.18)" clip-path="url(#forma)"/>
+          <rect id="relleno" x="0" y="100" width="100" height="0" fill="#fff" clip-path="url(#forma)"/>
+          <path d="M50 88 C20 66 6 50 6 32 C6 18 17 8 30 8 C39 8 46 13 50 20 C54 13 61 8 70 8 C83 8 94 18 94 32 C94 50 80 66 50 88 Z" fill="none" stroke="#fff" stroke-width="3"/>
+        </svg>
+      </div>
+      <div id="pct">0%</div>
+      <div id="frase">Juntando recuerdos...</div>
+      <div id="error"></div>
+    </div>
+    <script src="Build/Build_WebGL.loader.js"></script>
+    <script>
+      var frases = ["Juntando recuerdos...", "Preparando los tragos de la fiesta del Eliel...", "Inflando colchones en Emerald Lakes...",
+                    "Calentando la pizza de Papa Rolly...", "Escondiendo gatitos...", "Afinando la videollamada de 4 horas...",
+                    "Desenredando la guirnalda...", "Echándole Tajín a todo..."];
+      var fi = 0, fraseEl = document.getElementById("frase");
+      var rot = setInterval(function () {
+        fi = (fi + 1) % frases.length; fraseEl.style.opacity = 0;
+        setTimeout(function () { fraseEl.textContent = frases[fi]; fraseEl.style.opacity = .85; }, 450);
+      }, 2600);
+
+      var canvas = document.querySelector("#unity-canvas");
+      var esMovil = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      createUnityInstance(canvas, {
+        arguments: [],
+        dataUrl: "Build/Build_WebGL.data.unityweb",
+        frameworkUrl: "Build/Build_WebGL.framework.js.unityweb",
+        codeUrl: "Build/Build_WebGL.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Martin",
+        productName: "Javi _ Martin - 6 meses",
+        productVersion: "1.0",
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, esMovil ? 1.5 : 2),
+      }, function (p) {
+        var pct = Math.round(p * 100);
+        document.getElementById("pct").textContent = pct + "%";
+        var r = document.getElementById("relleno");
+        r.setAttribute("y", 100 - pct); r.setAttribute("height", pct);
+      }).then(function (instance) {
+        clearInterval(rot);
+        document.getElementById("pct").textContent = "100%";
+        setTimeout(function () { document.getElementById("carga").classList.add("fuera"); }, 400);
+        setTimeout(function () { document.getElementById("carga").style.display = "none"; }, 1400);
+        canvas.focus();
+      }).catch(function (message) {
+        var e = document.getElementById("error");
+        e.style.display = "block";
+        e.textContent = "Ups, algo falló al cargar: " + message + ". Prueba abrirlo en Chrome o Edge actualizado.";
+      });
+    </script>
+  </body>
+</html>
