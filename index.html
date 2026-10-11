@@ -5,6 +5,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#3B2A3F">
+    <!-- Para "Agregar a inicio": se abre como app, en pantalla completa y sin barras de Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Javi &amp; Martín">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
     <title>Javi &amp; Martín · 6 meses</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💗</text></svg>">
     <style>
@@ -48,18 +55,50 @@
       <div id="frase">Juntando recuerdos...</div>
       <div id="error"></div>
     </div>
-    <script src="Build/41b911b79da98bce42271b7fc1969e44.loader.js"></script>
+    <script src="Build/98d6a59373e0f5bc9178d08c2df7f24c.loader.js"></script>
     <script>
       var frases = ["Juntando recuerdos...", "Preparando los tragos de la fiesta del Eliel...", "Inflando colchones en Emerald Lakes...",
                     "Calentando la pizza de Papa Rolly...", "Escondiendo gatitos...", "Afinando la videollamada de 4 horas...",
                     "Desenredando la guirnalda...", "Echándole Tajín a todo..."];
       var fi = 0, fraseEl = document.getElementById("frase");
+      if ((/iPhone|iPod/.test(navigator.userAgent)) && navigator.standalone !== true) {
+        var tip = document.createElement("div");
+        tip.style.cssText = "margin-top:16px;font-family:system-ui,sans-serif;font-size:14px;opacity:.85;max-width:420px";
+        tip.innerHTML = "Tip: para jugar en pantalla completa, toca <b>Compartir → Agregar a inicio</b> y ábrelo desde el ícono.";
+        document.getElementById("carga").appendChild(tip);
+      }
       var rot = setInterval(function () {
         fi = (fi + 1) % frases.length; fraseEl.style.opacity = 0;
         setTimeout(function () { fraseEl.textContent = frases[fi]; fraseEl.style.opacity = .85; }, 450);
       }, 2600);
 
       var canvas = document.querySelector("#unity-canvas");
+      var esIOS = /iPhone|iPod/.test(navigator.userAgent) || (/iPad|Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+      var esApp = window.navigator.standalone === true || window.matchMedia("(display-mode: fullscreen)").matches || window.matchMedia("(display-mode: standalone)").matches;
+
+      // Instrucciones para iPhone (Safari no permite pantalla completa en páginas web)
+      function mostrarInstruccionesIOS() {
+        if (document.getElementById("ios-ayuda")) return;
+        var d = document.createElement("div"); d.id = "ios-ayuda";
+        d.style.cssText = "position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;" +
+          "background:rgba(59,42,63,.96);color:#fff;font-family:system-ui,sans-serif;text-align:center;padding:20px;";
+        d.innerHTML =
+          "<div style='font-size:21px;font-weight:700;margin-bottom:10px'>Pantalla completa en iPhone</div>" +
+          "<div style='font-size:16px;line-height:1.55;max-width:520px'>Safari no deja poner páginas en pantalla completa, pero puedes instalar el juego como app:<br>" +
+          "<b>1.</b> Toca el botón <b>Compartir</b> " +
+          "<svg width='18' height='22' viewBox='0 0 18 22' style='vertical-align:-4px'><path d='M9 1v13M4.5 5.5 9 1l4.5 4.5' fill='none' stroke='#fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><path d='M5 9H2v12h14V9h-3' fill='none' stroke='#fff' stroke-width='2' stroke-linejoin='round'/></svg>" +
+          " de Safari<br><b>2.</b> Elige <b>Agregar a inicio</b><br><b>3.</b> Abre el juego desde el ícono nuevo 💗</div>" +
+          "<div style='font-size:13px;opacity:.75;margin-top:12px;max-width:460px'>Ojo: la app guarda su propio avance (puedes usar Capítulos para ir donde quedaste).</div>" +
+          "<button style='margin-top:18px;font-size:17px;padding:10px 28px;border:0;border-radius:22px;background:#E8628C;color:#fff;font-weight:700'>Entendido</button>";
+        d.querySelector("button").onclick = function () { d.remove(); };
+        document.body.appendChild(d);
+      }
+      window.jmPantallaCompleta = function () {
+        var el = document.documentElement;
+        var hayApi = !!(el.requestFullscreen || el.webkitRequestFullscreen);
+        if (esIOS || !hayApi) { if (!esApp) mostrarInstruccionesIOS(); return 1; }
+        return 0;   // PC / Android: Unity se encarga (espera el toque, como exige el navegador)
+      };
       // Antes de cada toque/clic, avisar a Unity dónde está el dedo (si no, usa la posición del toque anterior
       // y el primer toque sobre un botón nuevo no cuenta).
       window.addEventListener("pointerdown", function (e) {
@@ -87,9 +126,9 @@
       var esMovil = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       createUnityInstance(canvas, {
         arguments: [],
-        dataUrl: "Build/a99db36ccfea015498ad457fa82f8dcb.data.unityweb",
-        frameworkUrl: "Build/e5bdbd1dd098832070e70fd566a5c84a.framework.js.unityweb",
-        codeUrl: "Build/2d5d52242c8c4445fc9ae23b3b15f1b7.wasm.unityweb",
+        dataUrl: "Build/ac147546cdfb1ba4829899d487a38db5.data.unityweb",
+        frameworkUrl: "Build/ffd43ceafebe71e38451fec945a6429e.framework.js.unityweb",
+        codeUrl: "Build/8ab01569ea5d160a922cb8303b24f933.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Martin",
         productName: "Javi _ Martin - 6 meses",
