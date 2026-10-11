@@ -48,7 +48,7 @@
       <div id="frase">Juntando recuerdos...</div>
       <div id="error"></div>
     </div>
-    <script src="Build/Build_WebGL.loader.js"></script>
+    <script src="Build/41b911b79da98bce42271b7fc1969e44.loader.js"></script>
     <script>
       var frases = ["Juntando recuerdos...", "Preparando los tragos de la fiesta del Eliel...", "Inflando colchones en Emerald Lakes...",
                     "Calentando la pizza de Papa Rolly...", "Escondiendo gatitos...", "Afinando la videollamada de 4 horas...",
@@ -60,24 +60,36 @@
       }, 2600);
 
       var canvas = document.querySelector("#unity-canvas");
+      // Antes de cada toque/clic, avisar a Unity dónde está el dedo (si no, usa la posición del toque anterior
+      // y el primer toque sobre un botón nuevo no cuenta).
+      window.addEventListener("pointerdown", function (e) {
+        if (e.target !== canvas || e.isTrusted === false) return;
+        window.__jmToques = (window.__jmToques || 0) + 1;
+        canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY, bubbles: true }));
+      }, true);
       // Si el celular se queda sin memoria gráfica, el navegador "pierde" WebGL y todo se congela:
       // mostramos cómo seguir (el avance queda guardado al empezar cada capítulo).
-      canvas.addEventListener("webglcontextlost", function (e) {
-        e.preventDefault();
+      var avisoMostrado = false;
+      function mostrarRecargar(titulo, texto) {
+        if (avisoMostrado) return; avisoMostrado = true;
         var d = document.createElement("div");
         d.style.cssText = "position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;" +
           "background:rgba(59,42,63,.94);color:#fff;font-family:system-ui,sans-serif;text-align:center;padding:24px;cursor:pointer";
-        d.innerHTML = "<div style='font-size:48px'>&#128151;</div><div style='font-size:22px;font-weight:700;margin:12px 0'>El celular se quedó sin memoria</div>" +
-          "<div style='font-size:17px;opacity:.9;max-width:460px'>Toca aquí para recargar. Tu avance quedó guardado: elige <b>Continuar</b> y sigues en el mismo capítulo.</div>";
+        d.innerHTML = "<div style='font-size:48px'>&#128151;</div><div style='font-size:22px;font-weight:700;margin:12px 0'>" + titulo + "</div>" +
+          "<div style='font-size:17px;opacity:.9;max-width:460px'>" + texto + "</div>";
         d.onclick = function () { location.reload(); };
         document.body.appendChild(d);
+      }
+      canvas.addEventListener("webglcontextlost", function (e) {
+        e.preventDefault();
+        mostrarRecargar("El celular se quedó sin memoria", "Toca aquí para recargar. Tu avance quedó guardado: elige <b>Continuar</b> y sigues en el mismo capítulo.");
       }, false);
       var esMovil = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       createUnityInstance(canvas, {
         arguments: [],
-        dataUrl: "Build/Build_WebGL.data.unityweb",
-        frameworkUrl: "Build/Build_WebGL.framework.js.unityweb",
-        codeUrl: "Build/Build_WebGL.wasm.unityweb",
+        dataUrl: "Build/a99db36ccfea015498ad457fa82f8dcb.data.unityweb",
+        frameworkUrl: "Build/e5bdbd1dd098832070e70fd566a5c84a.framework.js.unityweb",
+        codeUrl: "Build/2d5d52242c8c4445fc9ae23b3b15f1b7.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Martin",
         productName: "Javi _ Martin - 6 meses",
@@ -89,6 +101,14 @@
         var r = document.getElementById("relleno");
         r.setAttribute("y", 100 - pct); r.setAttribute("height", pct);
       }).then(function (instance) {
+        // Vigilante: si el juego deja de dar señales de vida >5 s con la pestaña visible, ofrecer recargar
+        var visibleDesde = performance.now();
+        document.addEventListener("visibilitychange", function () { visibleDesde = performance.now(); });
+        setInterval(function () {
+          var ahora = performance.now();
+          if (document.visibilityState !== "visible" || ahora - visibleDesde < 3000 || !window.__jmLatido) return;
+          if (ahora - window.__jmLatido > 5000) mostrarRecargar("El juego se trabó", "Toca aquí para recargar. Tu avance quedó guardado: elige <b>Continuar</b> y sigues en el mismo capítulo.");
+        }, 1000);
         window.unityInstance = instance;   // para diagnosticar (memoria, etc.)
         clearInterval(rot);
         document.getElementById("pct").textContent = "100%";
